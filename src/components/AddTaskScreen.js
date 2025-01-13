@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 const AddTaskScreen = ({ navigation }) => {
   const [taskTitle, setTaskTitle] = useState('');
@@ -7,26 +8,25 @@ const AddTaskScreen = ({ navigation }) => {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [notes, setNotes] = useState('');
-
-  // Define your addTodo function inside the screen itself or pass it in some other way
-  const addTodo = (todo) => {
-    console.log('New Todo:', todo);
-    // Add your logic to add the todo here
-  };
-
-  // Use setOptions to pass the addTodo function as part of navigation options
-  useEffect(() => {
-    navigation.setOptions({
-      addTodo: addTodo, // Attach addTodo function to navigation options
-    });
-  }, [navigation]);
+  
+  const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+  const [isTimePickerVisible, setTimePickerVisible] = useState(false);
 
   const handleSave = () => {
     if (taskTitle.trim() !== '') {
-      // Use the addTodo function from navigation options
       navigation.getParam('addTodo')({ title: taskTitle, category, date, time, notes });
       navigation.goBack();
     }
+  };
+
+  const handleDateConfirm = (date) => {
+    setDate(date.toLocaleDateString());
+    setDatePickerVisible(false);
+  };
+
+  const handleTimeConfirm = (time) => {
+    setTime(time.toLocaleTimeString());
+    setTimePickerVisible(false);
   };
 
   return (
@@ -55,26 +55,26 @@ const AddTaskScreen = ({ navigation }) => {
         />
       </View>
 
+      {}
       <View style={styles.rowContainer}>
         <View style={styles.rowItem}>
           <Text style={styles.label}>Date</Text>
-          <TextInput
+          <TouchableOpacity
             style={styles.input}
-            placeholder="MM/DD/YYYY"
-            placeholderTextColor="#bbb"
-            value={date}
-            onChangeText={setDate}
-          />
+            onPress={() => setDatePickerVisible(true)}
+          >
+            <Text style={{ color: '#fff' }}>{date || 'Select date'}</Text>
+          </TouchableOpacity>
         </View>
+
         <View style={styles.rowItem}>
           <Text style={styles.label}>Time</Text>
-          <TextInput
+          <TouchableOpacity
             style={styles.input}
-            placeholder="HH:MM"
-            placeholderTextColor="#bbb"
-            value={time}
-            onChangeText={setTime}
-          />
+            onPress={() => setTimePickerVisible(true)}
+          >
+            <Text style={{ color: '#fff' }}>{time || 'Select time'}</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -93,6 +93,22 @@ const AddTaskScreen = ({ navigation }) => {
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveButtonText}>Save</Text>
       </TouchableOpacity>
+
+      {}
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        onConfirm={handleDateConfirm}
+        onCancel={() => setDatePickerVisible(false)}
+      />
+
+      {}
+      <DateTimePickerModal
+        isVisible={isTimePickerVisible}
+        mode="time"
+        onConfirm={handleTimeConfirm}
+        onCancel={() => setTimePickerVisible(false)}
+      />
     </View>
   );
 };
@@ -128,6 +144,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     backgroundColor: '#2A2A3C',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   rowContainer: {
     flexDirection: 'row',
